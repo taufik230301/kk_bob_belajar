@@ -1,0 +1,430 @@
+-- Pertemuan 1
+select * from status_cuti;
+
+-- Statement Untuk memasukan data
+insert into cuti(id_cuti, nama_pengaju, alasan, tgl_diajukan, mulai, akhir, id_status_cuti ,perihal) 
+				values('a1', 'Taufiiqul Hakim', 'dikarenakan liburan', '2022-06-23',
+					   '2022-06-24', '2022-06-30', 2,'Cuti Liburan');
+					   
+insert into cuti(id_cuti, nama_pengaju, alasan, tgl_diajukan, mulai, akhir, id_status_cuti ,perihal) 
+				values('a2', 'Kresna', 'dikarenakan liburan', '2022-06-01',
+					   '2022-06-11', '2022-06-12', 2,'Cuti Liburan');
+					   
+insert into cuti(id_cuti, nama_pengaju, alasan, tgl_diajukan, mulai, akhir, id_status_cuti ,perihal) 
+				values('a3', 'Rian', 'dikarenakan sakit', '2022-05-11',
+					   '2022-05-17', '2022-06-18', 2,'Cuti Sakit');
+
+-- Statement Update data di dalam table
+update cuti set nama_pengaju = 'Taufik', alasan ='dikarenakan sakit' WHERE id_cuti = 'a1';
+
+-- Statement Hapus data di dalam table
+DELETE from cuti;
+
+-- Statement Hapus data di dalam table spesifik
+DELETE from cuti WHERE id_cuti ='a1';
+					   
+-- Statement Untuk memfilter data diantara tanggal 
+select * from cuti where tgl_diajukan between '2022-05-01' and '2022-05-30';
+
+-- Statement untuk filter
+-- Statement untuk filter tanggal spesifik
+select * from cuti where tgl_diajukan ='2022-05-11';
+
+select * from cuti where alasan ='dikarenakan liburan';
+
+select * from cuti where akhir ='2022-06-30';
+ 
+-- Statement melihat seluruh data join table di dalam table
+select id_cuti, nama_pengaju, alasan, tgl_diajukan, mulai, akhir, perihal, 
+status_cuti from cuti JOIN status_cuti ON cuti.id_status_cuti = status_cuti.id_status_cuti;
+
+select * from status_cuti;
+
+create function read_all_cuti()
+	returns TABLE(p_id_cuti character varying, p_nama_pengaju character varying, p_alasan text, p_tgl_diajukan date, 
+				  p_mulai date, p_akhir date, p_perihal character varying, p_status_cuti  character varying)
+	language plpgsql
+	as
+	$$
+	BEGIN
+		return query
+		select id_cuti, nama_pengaju, alasan, tgl_diajukan, mulai, akhir, perihal, 
+		status_cuti from "cuti" JOIN "status_cuti" ON cuti.id_status_cuti = status_cuti.id_status_cuti
+		order by nama_pengaju asc;
+	END;
+	$$;
+	
+alter function read_all_cuti() owner to postgres;
+
+
+create function read_all_mahasiswa()
+    returns TABLE(p_id_mahasiswa integer, p_nama_mahasiswa character varying, p_tgl_lahir date, p_email character varying, p_nama_jurusan character varying, p_alamat character varying, p_foto_mahasiswa character varying)
+    language plpgsql
+as
+$$
+BEGIN
+    return query
+    SELECT id_mahasiswa, nama_mahasiswa, tgl_lahir, email, nama_jurusan, alamat, foto_mahasiswa
+	FROM "mahasiswa_indonesia" JOIN "jurusan" ON mahasiswa_indonesia.id_jurusan = jurusan.id_jurusan
+    ORDER BY id_mahasiswa asc;
+END;
+$$;
+
+alter function read_all_mahasiswa() owner to postgres;
+
+
+select * from read_all_cuti();
+
+
+
+
+
+create function create_cuti(p_id_cuti character varying, p_nama_pengaju character varying, p_alasan text, 
+							p_tgl_diajukan date, p_mulai date, p_akhir date, p_id_status_cuti integer, p_perihal character varying)
+							returns void
+							language plpgsql
+							as
+							$$
+							BEGIN
+								INSERT INTO cuti(id_cuti, nama_pengaju, alasan, tgl_diajukan, mulai, akhir, id_status_cuti, perihal)
+								VALUES(p_id_cuti, p_nama_pengaju, p_alasan, p_tgl_diajukan, p_mulai, p_akhir, p_id_status_cuti, p_perihal);
+							END;
+							$$;
+
+-- Statement untuk memanggil fungsi read all cuti
+select * from read_all_cuti();
+
+-- Pertemuan 3
+
+-- Statement untuk memanggil fungsi read all cuti
+select * from read_all_cuti();
+
+-- Function untuk Insert Data ke dalam table
+create function create_cuti(p_id_cuti character varying, p_nama_pengaju character varying, p_alasan text, 
+							p_tgl_diajukan date, p_mulai date, p_akhir date, p_id_status_cuti integer, p_perihal character varying)
+							returns void
+							language plpgsql
+							as
+							$$
+							BEGIN
+								INSERT INTO cuti(id_cuti, nama_pengaju, alasan, tgl_diajukan, mulai, akhir, id_status_cuti, perihal)
+								VALUES(p_id_cuti, p_nama_pengaju, p_alasan, p_tgl_diajukan, p_mulai, p_akhir, p_id_status_cuti, p_perihal);
+							END;
+							$$;
+
+-- Statement untuk memanggil fungsi insert
+select * from create_cuti('a4', 'malian', 'dikarenakan Sakit', '2022-06-12', '2022-06-20', '2022-06-30', 1,'Cuti Sakit');
+
+-- Function untuk Update data dari dalam table
+create function update_cuti(p_nama_pengaju character varying, p_alasan text, p_tgl_diajukan date, p_mulai date, p_akhir date, 
+							p_id_status_cuti integer, p_perihal character varying, p_id_cuti character varying) returns void
+							language plpgsql
+							as
+							$$
+							BEGIN
+								UPDATE "cuti" SET nama_pengaju = p_nama_pengaju, alasan = p_alasan, tgl_diajukan = p_tgl_diajukan, 
+								mulai = p_mulai, akhir = p_akhir, id_status_cuti = p_id_status_cuti, perihal = p_perihal
+								WHERE id_cuti = p_id_cuti;
+							END;
+							$$;     
+							
+							
+-- Memanggil Fungsi ubah data didalam table
+select * from update_cuti('malian', 'dikarenakan Lembur','2022-06-13', '2022-06-20', '2022-06-28', 1,'Cuti Lembur', 'a4');
+
+
+-- Function untuk delete data dari dalam table 
+create function delete_cuti(p_id_cuti character varying) returns void
+	language plpgsql
+	as
+	$$
+	BEGIN
+		DELETE FROM "cuti" WHERE id_cuti=p_id_cuti;
+	END;
+	$$;
+	
+select * from delete_cuti('a4');
+
+							
+
+
+
+-- Statement Penjumlahan Didalam SQL
+SELECT SUM(column_name)
+FROM table_name
+WHERE condition;
+
+-- Statement Rata - Rata Dialam SQL
+SELECT AVG(column_name)
+FROM table_name
+WHERE condition;
+
+-- Statement Mengitung Didalam SQL
+SELECT COUNT(column_name)
+FROM table_name
+WHERE condition;
+
+-- Statement untuk memanggil function menarik data dari table
+
+select * from read_all_cuti();
+
+-- Statement untuk menarik data dari table
+select * from cuti;
+
+-- Statement untuk membuat sebuah view
+create view get_all_cuti(id_cuti, nama_pengaju, alasan, tgl_diajukan, mulai, akhir, status_cuti, perihal) as
+SELECT cuti.id_cuti,
+	   cuti.nama_pengaju,
+	   cuti.alasan,
+	   cuti.tgl_diajukan,
+	   cuti.mulai,
+	   cuti.akhir,
+	   status_cuti.status_cuti,
+	   cuti.perihal
+	   FROM cuti
+JOIN status_cuti on cuti.id_status_cuti = status_cuti.id_status_cuti;
+
+SELECT cuti.id_cuti,
+	   cuti.nama_pengaju,
+	   cuti.alasan,
+	   cuti.tgl_diajukan,
+	   cuti.mulai,
+	   cuti.akhir,
+	   status_cuti.id_status_cuti,
+	   cuti.perihal
+	   FROM cuti
+JOIN status_cuti on cuti.id_status_cuti = status_cuti.id_status_cuti;
+
+-- Statment untuk memanggil view
+SELECT * FROM get_all_cuti;
+SELECT * FROM get_all_cuti WHERE id_cuti = 'a3';
+
+-- Statement untuk memfilter id_cuti
+
+-- Statement OR Dipakai Jika Salah satu kondisi benar, maka keluaran masih benar
+SELECT * FROM get_all_cuti WHERE tgl_diajukan > '2022-06-01' OR tgl_diajukan < '2022-06-30';
+
+-- Statement AND Dipakai Semua Kondisi Harus benar
+SELECT * FROM get_all_cuti WHERE tgl_diajukan > '2022-06-01' AND tgl_diajukan < '2022-06-30' OR nama_pengaju='Kresna';
+
+-- Statement membuat materialized view
+create materialized view get_all_mahasiswa_materialized as
+SELECT mahasiswa_indonesia.id_mahasiswa,
+       mahasiswa_indonesia.nama_mahasiswa,
+       mahasiswa_indonesia.tgl_lahir,
+       mahasiswa_indonesia.email,
+       mahasiswa_indonesia.id_jurusan,
+       mahasiswa_indonesia.alamat
+FROM mahasiswa_indonesia;
+
+alter materialized view get_all_mahasiswa_materialized owner to postgres;
+
+-- Statement Memanggil materialized view
+SELECT * FROM get_all_mahasiswa_materialized;
+
+-- Statement Merefresh materialized view
+REFRESH MATERIALIZED VIEW order_summary;
+
+-- Statement Untuk membuat kolom auto increment
+ALTER TABLE log_delete_cuti ADD COLUMN id_log_delete_cuti SERIAL PRIMARY KEY;
+
+-- Statement Untuk membuat kolom tipe data date time
+ALTER TABLE log_delete_cuti ADD deleted_at timestamp;
+
+INSERT INTO log_delete_cuti(id_cuti, nama_pengaju, alasan, tgl_diajukan, 
+							mulai, akhir, id_status_cuti, perihal, deleted_at) 
+							VALUES('a2', 'Taufik Hakim', 'Karena Sakit', '2022-06-27', 
+								   '2022-06-28', '2022-07-18', 1, 'Cuti Sakit', now());
+							
+SELECT * FROM cuti;
+
+SELECT * FROM log_delete_cuti;
+
+DELETE FROM log_delete_cuti;
+
+
+SELECT * FROM CUTI;
+
+DELETE FROM cuti WHERE id_cuti = 'a2';
+
+SELECT * FROM log_delete_cuti;
+
+DELETE FROM log_delete_cuti;
+
+DELETE FROM cuti;
+
+-- Statement untuk membuat trigger function
+create function log_cuti_delete() returns trigger
+	language plpgsql
+as
+$$
+BEGIN
+	INSERT INTO log_delete_cuti(id_cuti, nama_pengaju, alasan, tgl_diajukan, 
+							mulai, akhir, id_status_cuti, perihal, deleted_at)
+							VALUES(
+							OLD."id_cuti"
+							,OLD."nama_pengaju"
+							,OLD."alasan"
+							,OLD."tgl_diajukan"
+							,OLD."mulai"
+							,OLD."akhir"
+							,OLD."id_status_cuti"
+							,OLD."perihal"
+							,now());
+	RETURN OLD;
+END;
+$$;
+
+-- Statement untuk mebuat trigger
+-- auto-generated definition
+create trigger delete_cuti
+    after delete
+    on cuti
+    for each row
+execute procedure log_cuti_delete();
+
+-- Statement Untuk Insert data ke log_delete_cuti
+INSERT INTO log_delete_cuti(id_cuti, nama_pengaju, alasan, tgl_diajukan, 
+							mulai, akhir, id_status_cuti, perihal, deleted_at) 
+							VALUES('a2', 'Taufik Hakim', 'Karena Sakit', '2022-06-27', 
+								   '2022-06-28', '2022-07-18', 1, 'Cuti Sakit',  now());
+
+
+
+SELECT * FROM CUTI;
+
+DELETE FROM cuti WHERE id_cuti = 'a2';
+
+SELECT * FROM log_delete_cuti;
+SELECT * FROM log_update_cuti;
+
+DELETE FROM log_delete_cuti;
+
+DELETE FROM cuti;
+
+insert into cuti(id_cuti, nama_pengaju, alasan, tgl_diajukan, mulai, akhir, id_status_cuti ,perihal) 
+				values('a1', 'taufik', 'dikarenakan liburan', '2022-06-01',
+					   '2022-06-11', '2022-06-12', 2,'Cuti Liburan');
+					   
+UPDATE cuti SET nama_pengaju='Rian' WHERE id_cuti='a2';
+
+
+-- Statement untuk membuat trigger function
+create function log_cuti_delete() returns trigger
+	language plpgsql
+as
+$$
+BEGIN
+	INSERT INTO log_delete_cuti(id_cuti, nama_pengaju, alasan, tgl_diajukan, 
+							mulai, akhir, id_status_cuti, perihal, deleted_at)
+							VALUES(
+							OLD."id_cuti"
+							,OLD."nama_pengaju"
+							,OLD."alasan"
+							,OLD."tgl_diajukan"
+							,OLD."mulai"
+							,OLD."akhir"
+							,OLD."id_status_cuti"
+							,OLD."perihal"
+							,now());
+	RETURN OLD;
+END;
+$$;
+
+-- Statement untuk mebuat trigger
+-- auto-generated definition
+create trigger delete_cuti
+    after delete
+    on cuti
+    for each row
+execute procedure log_cuti_delete();
+
+-- Statement Untuk Insert data ke log_delete_cuti
+INSERT INTO log_delete_cuti(id_cuti, nama_pengaju, alasan, tgl_diajukan, 
+							mulai, akhir, id_status_cuti, perihal, deleted_at) 
+							VALUES('a2', 'Taufik Hakim', 'Karena Sakit', '2022-06-27', 
+								   '2022-06-28', '2022-07-18', 1, 'Cuti Sakit',  now());
+								   
+								   -- Statement Untuk membuat kolom auto increment
+ALTER TABLE log_update_cuti ADD COLUMN id_log_update_cuti SERIAL PRIMARY KEY;
+
+-- Statement Untuk membuat kolom tipe data date time
+ALTER TABLE log_update_cuti ADD updated_at timestamp;
+
+-- Statement Untuk mebuat Trigger Funtion UPDATE
+create function log_cuti_update() returns trigger
+    language plpgsql
+as
+$$
+BEGIN
+		IF NEW."id_cuti" <> OLD."id_cuti" 
+			or NEW."nama_pengaju" <> OLD."nama_pengaju" 
+			or NEW."alasan" <> OLD."alasan" 
+			or NEW."tgl_diajukan" <> OLD."tgl_diajukan" 
+			or NEW."mulai" <> OLD."mulai" 
+			or NEW."akhir" <> OLD."akhir" 
+			or NEW."id_status_cuti" <> OLD."id_status_cuti" 
+			or NEW."perihal" <> OLD."perihal" 
+			
+			THEN
+				INSERT INTO log_update_cuti(id_cuti, nama_pengaju, alasan, tgl_diajukan, 
+							mulai, akhir, id_status_cuti, perihal, updated_at)
+							VALUES(
+							OLD."id_cuti"
+							,OLD."nama_pengaju"
+							,OLD."alasan"
+							,OLD."tgl_diajukan"
+							,OLD."mulai"
+							,OLD."akhir"
+							,OLD."id_status_cuti"
+							,OLD."perihal"
+							,now());
+		END IF;
+	RETURN NEW;
+END;
+$$;
+
+
+-- Statement Untuk membuat trigger update
+-- auto-generated definition
+create trigger update_cuti
+    before update
+    on cuti
+    for each row
+execute procedure log_cuti_update();
+
+
+
+
+								  
+								  
+
+
+
+
+
+
+
+
+
+
+
+							
+		
+							
+
+			
+		
+							
+
+
+							
+
+
+
+
+
+
+
+
+
